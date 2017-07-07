@@ -1,12 +1,19 @@
 package com.thomasphillips3.photogallery;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by thomas on 7/4/17.
  */
 
 public class GalleryItem {
+    @SerializedName("title")
     private String mCaption;
+
+    @SerializedName("url_s")
     private String mUrl;
+
+    @SerializedName("id")
     private String mId;
 
     public String getCaption() {
