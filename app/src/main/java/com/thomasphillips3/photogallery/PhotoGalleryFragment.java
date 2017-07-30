@@ -56,6 +56,7 @@ public class PhotoGalleryFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String s) {
                 Log.d(TAG, "QueryTextSubmit: " + s);
+                QueryPreferences.setStoredQuery(getActivity(), s);
                 updateItems();
                 return true;
             }
@@ -67,10 +68,23 @@ public class PhotoGalleryFragment extends Fragment {
             }
         });
     }
-    private void updateItems() {
-        new FetchItemsTask().execute();
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_clear:
+                QueryPreferences.setStoredQuery(getActivity(), null);
+                updateItems();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
-    
+    private void updateItems() {
+        String query = QueryPreferences.getStoredQuery(getActivity());
+        new FetchItemsTask(query).execute();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
@@ -97,14 +111,20 @@ public class PhotoGalleryFragment extends Fragment {
 
 
     private class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
+        private String mQuery;
+
+        public FetchItemsTask(String query) {
+            mQuery = query;
+        }
+
         @Override
         protected List<GalleryItem>doInBackground(Void... params) {
-            String query = "owl";   // Debug use
+            new FetchItemsTask(mQuery).execute();
 
-            if (query == null){
+            if (mQuery == null){
                 return new FlickrFetcher().fetchRecentPhotos();
             } else {
-                return new FlickrFetcher().searchPhotos(query);
+                return new FlickrFetcher().searchPhotos(mQuery);
             }
         }
         @Override
