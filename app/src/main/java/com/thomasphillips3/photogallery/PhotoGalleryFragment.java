@@ -44,7 +44,6 @@ public class PhotoGalleryFragment extends Fragment {
 
         Intent i = PollService.newIntent(getActivity());
         getActivity().startService(i);
-
         Log.i(TAG, "Background thread started");
     }
 
@@ -78,7 +77,15 @@ public class PhotoGalleryFragment extends Fragment {
                 Log.d(TAG, "QueryTextChange: " + s);
                 return false;
             }
+
         });
+
+        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
+        if (!PollService.isServiceAlarmOn(getActivity())) {
+            toggleItem.setTitle(R.string.start_polling);
+        } else {
+            toggleItem.setTitle(R.string.stop_polling);
+        }
     }
 
     @Override
@@ -88,10 +95,16 @@ public class PhotoGalleryFragment extends Fragment {
                 QueryPreferences.setStoredQuery(getActivity(), null);
                 updateItems();
                 return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
+                getActivity().invalidateOptionsMenu();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
     private void updateItems() {
         String query = QueryPreferences.getStoredQuery(getActivity());
         new FetchItemsTask(query).execute();
@@ -139,6 +152,7 @@ public class PhotoGalleryFragment extends Fragment {
                 return new FlickrFetcher().searchPhotos(mQuery);
             }
         }
+
         @Override
         protected void onPostExecute(List<GalleryItem> items) {
             mItems = items;

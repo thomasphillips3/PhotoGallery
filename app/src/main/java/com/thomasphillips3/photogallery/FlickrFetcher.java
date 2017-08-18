@@ -111,6 +111,8 @@ public class FlickrFetcher {
         JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
         Gson gson = new GsonBuilder().create();
 
+        // TODO: Figure out if this is the reason my results keep reloading.
+        // I think I'm reloading the entire list every time a new result downloads.
         return new ArrayList<>(Arrays.asList(gson
                 .fromJson(photoJsonArray.toString(), GalleryItem[].class)));
     }
